@@ -86,6 +86,27 @@ async function run() {
       }
     });
 
+    // USER INFO UPDATE LAST LOGGED API
+    app.put("/update-last-logged", async (req, res) => {
+      const { uid, time } = req.body;
+
+      const query = {
+        uid: uid,
+      };
+      const updatedInfo = {
+        $set: {
+          lastSignInTime: time,
+        },
+      };
+      try {
+        const result = await userCollection.updateOne(query, updatedInfo);
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating last logged time:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
     // USER INFO GET API
     app.get("/get-user/:uid", verifyToken, async (req, res) => {
       try {

@@ -86,6 +86,45 @@ async function run() {
       }
     });
 
+    // USER INFO UPDATE INFORMATION API
+    app.put("/update-user-info", verifyToken, async (req, res) => {
+      const { uid, type, data } = req.body;
+
+      const query = {
+        uid: uid,
+      };
+
+      if (type === "first") {
+        const updatedInfo = {
+          $set: {
+            firstName: data,
+          },
+        };
+        const result = await userCollection.updateOne(query, updatedInfo);
+        res.send(result);
+      }
+
+      if (type === "last") {
+        const updatedInfo = {
+          $set: {
+            lastName: data,
+          },
+        };
+        const result = await userCollection.updateOne(query, updatedInfo);
+        res.send(result);
+      }
+
+      if (type === "phone") {
+        const updatedInfo = {
+          $set: {
+            phone: data,
+          },
+        };
+        const result = await userCollection.updateOne(query, updatedInfo);
+        res.send(result);
+      }
+    });
+
     // USER INFO UPDATE LAST LOGGED API
     app.put("/update-last-logged", async (req, res) => {
       const { uid, time } = req.body;

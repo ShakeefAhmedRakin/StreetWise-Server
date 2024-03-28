@@ -63,11 +63,9 @@ async function run() {
       next();
     };
 
-    app.get("/test", verifyToken, verifyAdmin, async (req, res) => {
-      res.send("working");
-    });
-
-    // ----------------------APIS-------------------------
+    // ------------------------------------------------------------
+    // ----------------------CUSTOMER APIS-------------------------
+    // ------------------------------------------------------------
 
     // USER CREATION POST API
     app.post("/create-user", async (req, res) => {
@@ -178,7 +176,71 @@ async function run() {
       }
     });
 
-    // ---------------------------------------------------
+    // ---------------------------------------------------------
+    // ----------------------ADMIN APIS-------------------------
+    // ---------------------------------------------------------
+
+    // USERS COUNT BASED ON FILTER (COUNT) API
+    app.get(
+      "/manage/get-users/count",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        let query = {};
+
+        if (req.query?.filter) {
+          query.role = req.query.filter;
+        }
+
+        const count = await userCollection.countDocuments(query);
+        res.send({ count });
+      }
+    );
+
+    // USERS DATA BASED ON FILTER API
+    app.get("/manage/get-users", verifyToken, verifyAdmin, async (req, res) => {
+      let query = {};
+      if (req.query?.filter) {
+        query.role = req.query.filter;
+      }
+
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+
+      const result = await userCollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send(result);
+    });
+
+    // USERS UPDATE ROLE API
+    app.put(
+      "/manage/change-user-role",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const { uid, role } = req.body;
+
+        const query = {
+          uid: uid,
+        };
+
+        const updatedInfo = {
+          $set: {
+            role: role,
+          },
+        };
+
+        try {
+          const result = await userCollection.updateOne(query, updatedInfo);
+          res.send(result);
+        } catch (error) {
+          res.status(500).send("Internal Server Error");
+        }
+      }
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();

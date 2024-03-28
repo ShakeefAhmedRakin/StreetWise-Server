@@ -180,28 +180,45 @@ async function run() {
     // ----------------------ADMIN APIS-------------------------
     // ---------------------------------------------------------
 
-    // USERS COUNT BASED ON FILTER (COUNT) API
+    // USERS COUNT BASED ON FILTER AND SEARCH (COUNT) API
     app.get(
       "/manage/get-users/count",
       verifyToken,
       verifyAdmin,
       async (req, res) => {
-        let query = {};
+        try {
+          let query = {};
 
-        if (req.query?.filter) {
-          query.role = req.query.filter;
+          if (req.query?.filter) {
+            query.role = req.query.filter;
+          }
+
+          if (req.query?.search) {
+            const searchRegex = new RegExp(req.query.search, "i");
+            query.$or = [{ firstName: searchRegex }, { lastName: searchRegex }];
+          }
+
+          const count = await userCollection.countDocuments(query);
+          res.send({ count });
+        } catch (error) {
+          console.error("Error counting users:", error);
+          res
+            .status(500)
+            .send({ error: "An error occurred while counting users" });
         }
-
-        const count = await userCollection.countDocuments(query);
-        res.send({ count });
       }
     );
 
-    // USERS DATA BASED ON FILTER API
+    // USERS DATA BASED ON FILTER AND SEARCH API
     app.get("/manage/get-users", verifyToken, verifyAdmin, async (req, res) => {
       let query = {};
       if (req.query?.filter) {
         query.role = req.query.filter;
+      }
+
+      if (req.query?.search) {
+        const searchRegex = new RegExp(req.query.search, "i");
+        query.$or = [{ firstName: searchRegex }, { lastName: searchRegex }];
       }
 
       const page = parseInt(req.query.page);

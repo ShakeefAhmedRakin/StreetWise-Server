@@ -114,12 +114,28 @@ async function run() {
         res.send(result);
       }
 
-      if (type === "phone") {
+      if (type === "address") {
+        const toBeUpdated = await userCollection.findOne(query);
         const updatedInfo = {
           $set: {
-            phone: data,
+            address: [...toBeUpdated.address, data],
           },
         };
+        const result = await userCollection.updateOne(query, updatedInfo);
+        res.send(result);
+      }
+
+      if (type === "address-delete") {
+        const toBeUpdated = await userCollection.findOne(query);
+        const { index } = req.body;
+        const newAddressArray = [...toBeUpdated.address];
+        newAddressArray.splice(index, 1);
+        const updatedInfo = {
+          $set: {
+            address: [...newAddressArray],
+          },
+        };
+
         const result = await userCollection.updateOne(query, updatedInfo);
         res.send(result);
       }

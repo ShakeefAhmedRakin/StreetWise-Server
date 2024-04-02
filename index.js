@@ -27,6 +27,14 @@ async function run() {
       .db("StreetWiseDB")
       .collection("userCollection");
 
+    const categoryCollection = client
+      .db("StreetWiseDB")
+      .collection("categoryCollection");
+
+    const productCollection = client
+      .db("StreetWiseDB")
+      .collection("productCollection");
+
     // JWT TOKEN AUTH API
     app.post("/jwt", async (req, res) => {
       const uid = req.body;
@@ -256,6 +264,60 @@ async function run() {
         } catch (error) {
           res.status(500).send("Internal Server Error");
         }
+      }
+    );
+
+    // CATEGORIES GET API
+    app.get("/manage/get-categories", async (req, res) => {
+      const categories = await categoryCollection.find().toArray();
+
+      res.json(categories);
+    });
+
+    // CATEGORY ADD API
+    app.post(
+      "/manage/add-category",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        console.log(req.body);
+        const { category } = req.body;
+
+        const query = { category };
+
+        const existingCategory = await categoryCollection.findOne(query);
+        if (existingCategory) {
+          return res.status(400).json({ message: "Category already exists" });
+        }
+
+        await categoryCollection.insertOne({ category });
+
+        res.status(200).json({ message: "Category added successfully" });
+      }
+    );
+
+    // CATEGORY DELETE API
+    app.delete(
+      "/manage/delete-category/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const categoryId = new ObjectId(id);
+        const result = await categoryCollection.deleteOne({ _id: categoryId });
+        res.send(result);
+      }
+    );
+
+    // PRODUCT ADD API
+    app.post(
+      "/manage/add-product",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const { data } = req.body;
+        const result = await productCollection.insertOne(data);
+        res.send(result);
       }
     );
   } finally {

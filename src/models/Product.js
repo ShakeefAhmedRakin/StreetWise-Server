@@ -25,7 +25,12 @@ const ProductSchema = new Schema({
   price: {
     type: String,
     required: true,
-    default: "",
+    default: "0",
+  },
+  cost: {
+    type: String,
+    required: true,
+    default: "0",
   },
   category: {
     type: String,
@@ -56,8 +61,28 @@ const ProductSchema = new Schema({
     required: true,
     default: false,
   },
+  added: {
+    type: Number,
+    default: Date.now,
+  },
+  lastModified: {
+    type: Number,
+    default: Date.now,
+  },
+  orders: [
+    {
+      orderId: {
+        type: Schema.Types.ObjectId,
+        ref: "Order",
+      },
+      quantity: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
 });
 
-const Category = model("Product", ProductSchema, "productCollection");
+const Product = model("Product", ProductSchema, "productCollection");
 
-module.exports = Category;
+module.exports = Product;

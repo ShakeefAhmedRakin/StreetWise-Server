@@ -15,6 +15,7 @@ app.use(authRoute);
 app.use(userRoutes);
 app.use(categoryRoutes);
 app.use(productRoutes);
+
 app.get("/health", (req, res) => {
   res.send("StreetWiseClothing Server is running");
 });
@@ -26,7 +27,7 @@ app.all("*", (req, res, next) => {
   next(error);
 });
 
-// GLOBAL MIDDLEWARE FOR HANDLING ERRORS ( THIS STOPS SERVER FROM CRASHING WHEN ERRORS OCCURRED)
+// GLOBAL MIDDLEWARE FOR HANDLING ERRORS ( THIS STOPS SERVER FROM CRASHING WHEN ERRORS OCCURRED )
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ message: err.message });
 });

@@ -3,12 +3,10 @@ const { Schema, model } = require("mongoose");
 const ProductSchema = new Schema({
   name: {
     type: String,
-    required: true,
     default: "",
   },
   description: {
     type: String,
-    required: true,
     default: "",
   },
   sizes: {
@@ -18,12 +16,10 @@ const ProductSchema = new Schema({
   },
   gender: {
     type: String,
-    required: true,
     default: "",
   },
   color: {
     type: String,
-    required: true,
     default: "",
   },
   price: {
@@ -33,7 +29,6 @@ const ProductSchema = new Schema({
   },
   category: {
     type: String,
-    required: true,
     default: "",
   },
   stock: {

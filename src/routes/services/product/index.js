@@ -16,6 +16,19 @@ router.post(
   }
 );
 
+// SINGLE PRODUCT GET API ( ADMIN )
+router.get(
+  "/manage/get-product",
+  verifyToken,
+  verifyAdmin,
+  async (req, res) => {
+    const id = req.query.id;
+
+    const result = await Product.findById(id);
+    res.send(result);
+  }
+);
+
 // PRODUCT GET API ( ADMIN )
 router.get(
   "/manage/get-products",

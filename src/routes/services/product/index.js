@@ -29,6 +29,32 @@ router.get(
   }
 );
 
+// SINGLE PRODUCT UPDATE API ( ADMIN )
+router.put(
+  "/manage/update-product",
+  verifyToken,
+  verifyAdmin,
+  async (req, res) => {
+    try {
+      const { id } = req.body;
+      const { data } = req.body;
+
+      const updatedResult = await Product.findByIdAndUpdate(id, data, {
+        new: true,
+      });
+
+      if (!updatedResult) {
+        return res.status(404).json({ message: "Data not found" });
+      }
+
+      res.json(updatedResult);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
+
 // PRODUCT GET API ( ADMIN )
 router.get(
   "/manage/get-products",
@@ -45,6 +71,7 @@ router.get(
       query.$or = [
         { name: searchRegex },
         { color: searchRegex },
+        { gender: searchRegex },
         { description: searchRegex },
         { category: searchRegex },
       ];

@@ -12,7 +12,7 @@ router.post("/create-user", async (req, res) => {
 
     if (!userExists) {
       const newUser = await User.create(userInfo);
-      console.log(newUser);
+
       res.send(newUser);
     } else {
       res.send({ prevUser: true });

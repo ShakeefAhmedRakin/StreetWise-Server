@@ -3,6 +3,7 @@ const Product = require("../../../models/Product");
 var router = express.Router();
 const verifyToken = require("../../../middlewares/verifyToken");
 const verifyAdmin = require("../../../middlewares/verifyAdmin");
+const mongoose = require("mongoose");
 
 // PRODUCT ADD API ( ADMIN )
 router.post(
@@ -127,5 +128,64 @@ router.get(
     }
   }
 );
+
+// PRODUCT GET API ( PUBLIC )
+router.get("/public/get-products/featured", async (req, res) => {
+  let query = { draft: false, featured: true };
+
+  if (req.query?.filter) {
+    query.draft = req.query.filter === "true"; // Convert filter to boolean
+  }
+
+  if (req.query?.search) {
+    const searchRegex = new RegExp(req.query.search, "i");
+    query.$or = [
+      { name: searchRegex },
+      { color: searchRegex },
+      { gender: searchRegex },
+      { description: searchRegex },
+      { category: searchRegex },
+    ];
+  }
+
+  try {
+    const result = await Product.find(query).select(
+      "-draft -featured -added -lastModified -orders -__v"
+    );
+    res.send(result);
+  } catch (error) {
+    console.error("Error retrieving products:", error);
+    res
+      .status(500)
+      .send({ error: "An error occurred while retrieving products" });
+  }
+});
+
+// PRODUCT GET DETAILS API ( PUBLIC )
+router.get("/public/get-product-details/:id", async (req, res) => {
+  const productId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    return res.status(400).send({ error: "Invalid product ID" });
+  }
+
+  try {
+    const product = await Product.findOne({
+      _id: new mongoose.Types.ObjectId(productId),
+      draft: false,
+    }).select("-draft -featured -added -lastModified -orders -__v");
+
+    if (!product) {
+      return res.status(404).send({ error: "Product not found" });
+    }
+
+    res.send(product);
+  } catch (error) {
+    console.error("Error retrieving product:", error);
+    res.status(500).send({
+      error: `An error occurred while retrieving the product details for ${productId}`,
+    });
+  }
+});
 
 module.exports = router;
